@@ -1,81 +1,81 @@
-#include <iostream>
-#include <algorithm>
-#include <cstdio>
+#include <bits/stdc++.h>
 using namespace std;
 
-int M,n;
+typedef unsigned long long ll;
+#define endl '\n'
 
-struct node//定义一个矩阵类型的结构体
+int M, n;
+
+const long long mod = 1e9 + 7; // 取模的值
+
+struct node
 {
-    int m[100][100];
-} ans,res;//ans是结果，res是最初的方阵
-node mul(node A,node B)
+    ll m[110][110];
+} ans, res;
+
+node mul(node A, node B)
 {
-    int i,j,k;
-    node temp;//定义一个临时矩阵，存放A*B的结果
-    for(i=0; i<n; i++)//先全部定义为0
-    {
-        for(j=0; j<n; j++)
+    node temp;
+    for (int i = 0; i < n; i++)
+    { // 初始化为0
+        for (int j = 0; j < n; j++)
         {
             temp.m[i][j] = 0;
         }
     }
-    for(i=0; i<n; i++)//矩阵相乘的代码
-    {
-        for(j=0; j<n; j++)
+    for (int i = 0; i < n; i++)
+    { // 矩阵乘法+取模
+        for (int j = 0; j < n; j++)
         {
-            for(k=0; k<n; k++)
+            for (int k = 0; k < n; k++)
             {
-                temp.m[i][j] += A.m[i][k] * B.m[k][j];
+                temp.m[i][j] = (temp.m[i][j] + 1LL * A.m[i][k] * B.m[k][j] % mod) % mod;
             }
         }
     }
     return temp;
 }
-void quickpower(int M,int n)
+
+void quickpower(int M)
 {
-    int i,j;
-    for(i=0; i<n; i++)
+    // 初始化单位矩阵
+    for (int i = 0; i < n; i++)
     {
-        for(j=0; j<n; j++)
+        for (int j = 0; j < n; j++)
         {
-            if(i == j)
-            {
-                ans.m[i][j] = 1;
-            }
-            else
-                ans.m[i][j] = 0;
+            ans.m[i][j] = (i == j ? 1 : 0);
         }
-    }//这里是思想的转换，之前我们定义为1去计算，所以我们先初始化ans为
-    //单位矩阵，我们知道单位矩阵与任何矩阵的乘积为其本身
-    while(M)//快速幂的步骤
+    }
+
+    while (M)
     {
-        if(M & 1)
+        if (M & 1)
         {
-            ans = mul(ans,res);
+            ans = mul(ans, res);
         }
-        res = mul(res,res);
-        M = M >> 1;
+        res = mul(res, res);
+        M >>= 1;
     }
 }
+
 int main()
 {
-    cin>>n;//方阵的阶数
-    cin>>M;//指数
-    int i,j;
-    for(i=0; i<n; i++)
-    {
-        for(j=0; j<n; j++)
+    cin >> n >> M;
+    for (int i = 0; i < n; i++)
+    { // 输入初始矩阵
+        for (int j = 0; j < n; j++)
         {
-            cin>>res.m[i][j];//初始化方阵res
+            cin >> res.m[i][j];
         }
     }
-    quickpower(M,n);//进行快速幂
-    for(i=0; i<n; i++)//输出
-    {
-        for(j=0; j<n; j++)
+
+    quickpower(M); // 执行矩阵快速幂
+
+    for (int i = 0; i < n; i++)
+    { // 输出结果
+        for (int j = 0; j < n; j++)
         {
-            printf("%d ",ans.m[i][j]);
+            printf("%d ", ans.m[i][j]);
         }
         printf("\n");
     }
