@@ -17,5 +17,5 @@
 1. 克隆这个仓库：
 
     ``` bash
-    git clone git@github.com:fsj2009yx/acm_template.git
+    git clone git@github.com:fsj2009yx/acm_template_primary.git
     ```
