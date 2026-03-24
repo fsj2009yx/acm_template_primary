@@ -4,6 +4,9 @@ typedef pair<int, int> P; // 结束时间first 占用算力second
 int n, m, h[200005];
 priority_queue<P, vector<P>, greater<P>> pq[200005]; // 堆
 
+// 大根堆
+priority_queue<int> max_heap; // 大根堆
+
 /*
     greater<P>: 这是一个比较函数对象，用来定义元素之间的排序规则。
     通过使用 greater<P>，我们实际上创建了一个最小堆（minimum heap）

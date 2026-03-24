@@ -4,6 +4,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define MAXN 1000001
+
 typedef long long ll;
 ll n, m, a[MAXN], ans[MAXN << 2], tag[MAXN << 2]; // 4倍空间
 // ans[i]表示线段树节点i的区间信息，tag[i]表示线段树节点i的懒标记
@@ -24,15 +25,14 @@ inline ll rs(ll x)
 // 输入
 void scan()
 {
+    // n,m对应M和D
     cin >> n >> m;
-    for (ll i = 1; i <= n; i++)
-        cin >> a[i]; // 读入数组
 }
 
 // 左右子节点汇集父节点信息
 inline void push_up(ll p)
 {
-    ans[p] = ans[ls(p)] + ans[rs(p)];
+    ans[p] = max(ans[ls(p)], ans[rs(p)]);
 }
 void build(ll p, ll l, ll r)
 {
@@ -53,7 +53,7 @@ inline void f(ll p, ll l, ll r, ll k)
 {
     tag[p] = tag[p] + k;
     // 先修改父节点的区间信息，再打标记，后续访问子节点时传递信息
-    ans[p] = ans[p] + k * (r - l + 1);
+    ans[p] += k;
 }
 
 // 向下传递懒标记
@@ -66,11 +66,12 @@ inline void push_down(ll p, ll l, ll r)
 }
 
 // 区间修改，增加k
+// nl,nr表示要修改的区间，l,r表示当前节点维护的区间，p表示当前节点编号，k表示要增加的值
 inline void update(ll nl, ll nr, ll l, ll r, ll p, ll k)
 {
     if (nl <= l && r <= nr)
     {
-        ans[p] += k * (r - l + 1);
+        ans[p] += k;
         tag[p] += k;
         return;
     }
@@ -83,7 +84,26 @@ inline void update(ll nl, ll nr, ll l, ll r, ll p, ll k)
     push_up(p);
 }
 
+// 单点修改，修改位置pos的值为val
+// pos表示要修改的位置，val表示要修改的值，l,r表示当前节点维护的区间，p表示当前节点编号
+inline void update_single(ll pos, ll val, ll l, ll r, ll p)
+{
+    if (l == r)
+    {
+        ans[p] = val;
+        return;
+    }
+    ll mid = (l + r) >> 1;
+    if (pos <= mid)
+        update_single(pos, val, l, mid, ls(p));
+    else
+        update_single(pos, val, mid + 1, r, rs(p));
+    push_up(p);
+}
+
 // 区间查询，求区间和
+
+// q_x,q_y表示要查询的区间，l,r表示当前节点维护的区间，p表示当前节点编号
 ll query(ll q_x, ll q_y, ll l, ll r, ll p)
 {
     ll res = 0;
@@ -92,9 +112,9 @@ ll query(ll q_x, ll q_y, ll l, ll r, ll p)
     ll mid = (l + r) >> 1;
     push_down(p, l, r);
     if (q_x <= mid)
-        res += query(q_x, q_y, l, mid, ls(p));
+        res = max(res, query(q_x, q_y, l, mid, ls(p)));
     if (q_y > mid)
-        res += query(q_x, q_y, mid + 1, r, rs(p));
+        res = max(res, query(q_x, q_y, mid + 1, r, rs(p)));
     return res;
 }
 
@@ -102,24 +122,32 @@ int main()
 {
     ios::sync_with_stdio(0);
     cin.tie(0), cout.tie(0);
-    ll a1, b, c, d, e, f;
+    char op;
+    ll b, last_ans = 0, c, d, L, f;
+    ll lens = 0; // 持续增长的数组长度
     scan();
     build(1, 1, n);
-    while (m--)
+
+    int count = n;
+    while (count--)
     {
-        cin >> a1; // 1表示修改，2表示查询
-        switch (a1)
+        cin >> op;
+        switch (op)
         {
-        case 1:
+        case 'A':
         {
-            cin >> b >> c >> d; // b,c,d分别表示区间的左端点，右端点，修改值
-            update(b, c, 1, n, 1, d);
+            cin >> b; // 要插入的数
+            lens++;
+            update_single(lens, (b + last_ans) % m, 1, n, 1);
             break;
         }
-        case 2:
+        case 'Q':
         {
-            cin >> e >> f; // e,f分别表示区间的左端点，右端点
-            printf("%lld\n", query(e, f, 1, n, 1));
+            // 即L
+            cin >> L;
+            f = lens - min(lens, L) + 1; // 即R
+            last_ans = query(f, lens, 1, n, 1);
+            printf("%lld\n", last_ans);
             break;
         }
         }
